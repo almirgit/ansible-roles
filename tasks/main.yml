@@ -1,0 +1,48 @@
+## Version 0.1.0
+# Input:
+# rvar_os_type: "rhel_8"
+# rvar_export_directory: "/exports/wpbackup2"
+# rvar_client_server: "nur4.koderacloud.net"
+---
+- name: Setup NFS server
+  block:
+    #- name: Checking operating system...
+    #  ansible.builtin.fail:
+    #    msg: "Play stopped. 'rvar_os_type' expected to be rhel_8!"
+    #  when: rvar_os_type != 'rhel_8'
+    
+    - name: Install NFS package
+      ansible.builtin.package:
+        #name: "{{ rvar_nfs_packages }}"
+        name: 
+          - nfs-utils
+        state: present
+    
+    - name: Ensure export directory exists
+      ansible.builtin.file:
+        path: "{{ rvar_export_directory }}"
+        state: directory
+        owner: nobody
+        group: nobody
+        mode: '0755'
+        recurse: yes
+    
+    - name: Update /etc/exports with new export directory
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        #line: "{{rvar_export_directory}} {{rvar_client_server}}(rw,sync,no_root_squash)"
+        line: "{{rvar_export_directory}} {{rvar_client_server}}(rw,sync,no_root_squash,no_subtree_check)"
+        create: yes
+        backup: yes
+
+    - name: Apply exported settings
+      command: exportfs -rav
+    
+    - name: Restart NFS service to apply changes
+      ansible.builtin.service:
+        name: nfs-utils.service
+        state: restarted
+      become: true
+  when: rvar_os_type == 'rhel_8'
+
+
