@@ -1,8 +1,8 @@
 ## Version 0.1.0
-# Input:
-# rvar_os_type: "rhel_8"
-# rvar_export_directory: "/exports/wpbackup2"
-# rvar_client_server: "nur4.koderacloud.net"
+# Input variables:
+#   rvar_os_type: "rhel_8"
+#   rvar_export_directory: "/exports/wpbackup"
+#   rvar_client_server: "nur4.example.com"
 ---
 - name: Setup NFS server
   block:
