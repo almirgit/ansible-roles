@@ -1,0 +1,35 @@
+## Version 0.1.0
+# Example input variables:
+# rvar_os_type: "debian_11" # Only applied on debian / ubuntu distributions
+---
+- name: Setup NFS client
+  block:
+    - name: Install NFS package
+      ansible.builtin.package:
+        name: 
+          - nfs-common
+        state: present
+    
+    - name: Ensure export directory exists
+      ansible.builtin.file:
+        path: "{{ rvar_mount_directory }}"
+        state: directory
+          #owner: root
+          #group: root
+        owner: "{{rvar_mnt_dir_owner}}"
+        group: "{{rvar_mnt_dir_group}}"
+        mode: '0755'
+    
+    - name: Update /etc/fstab with new export directory
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: "{{rvar_nfs_server}}:{{rvar_export_directory}} {{rvar_mount_directory}} nfs auto,nofail,noatime,nolock,tcp 0 0"
+        backup: yes
+
+    - name: Mount according to fstab
+      shell: "{{item}}"
+      loop:
+        - "mount {{rvar_mount_directory}} || true"
+    
+  when: rvar_os_type == 'debian_11'
+
